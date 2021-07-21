@@ -89,7 +89,7 @@ app.post('/categoria', async (req, res) => {
 
 app.delete('/categoria/:id',async (req,res)=>{
     try{
-        let query = 'SELECT nombre_libro FROM libros WHERE categoria_id=?'
+        let query = 'SELECT * FROM libros WHERE categoria_id=?'
         let respuesta = await qy(query, [req.params.id]);
 
         // Verifico que no exista ese nombre
@@ -107,7 +107,7 @@ app.delete('/categoria/:id',async (req,res)=>{
 
         query = 'DELETE FROM genero WHERE id = ?';
         respuesta = await qy(query, [req.params.id]);
-        res.send({"respuesta": respuesta.affectedRows});
+        res.send({"respuesta": "Se borro correctamente"});
     }
     catch(e){
         console.error(e.message);
@@ -181,10 +181,10 @@ app.post('/persona', async (req, res) => {
 
 app.delete('/persona/:id',async (req,res)=>{
     try{
-        let query = 'SELECT nombre_libro FROM libros WHERE lector_id=?'
+        let query = 'SELECT * FROM libros WHERE lector_id=?'
         let respuesta = await qy(query, [req.params.id]);
 
-        // Verifico que no exista ese nombre
+        // Verifico que la persona no pesea libros
 
         if (respuesta.length > 0){
             throw new Error ("Esa persona tiene libros asociados, no se puede eliminar");
@@ -200,7 +200,7 @@ app.delete('/persona/:id',async (req,res)=>{
         query = 'DELETE FROM lectores WHERE id = ?';
         respuesta = await qy(query, [req.params.id]);
       
-        res.send({"respuesta": respuesta.affectedRows});
+        res.send({"respuesta": "Se borro correctamente"});
     }
     catch(e){
         console.error(e.message);
@@ -236,6 +236,123 @@ app.put('persona/:id', async (req, res)=>{
 });
 
 
+// CRUD de Libros
+
+app.get('/libros', async (req, res) => {
+    try{
+        const query = 'SELECT * FROM libros';
+        const respuesta = await qy(query);
+        res.send({"respuesta": respuesta});
+    }
+    catch(e){
+        console.error(e.message);
+        res.status(413).send({"Error": e.message});
+
+    }
+});
+
+app.get('/libros/:id', async (req, res) => {
+    try{
+        const query = 'SELECT * FROM libros WHERE id=?';
+        const respuesta = await qy(query,[req.params.id]);
+        
+        if(respuesta.length == 0){
+            throw new Error ("No se encuentra ese libro");
+        } 
+        
+        res.send({"respuesta": respuesta});
+               
+    }
+    catch(e){
+        console.error(e.message);
+        res.status(413).send({"Error": e.message});
+
+    }
+});
+
+app.post('/libro', async (req, res) => {
+    try{
+        // Veo si me mandan bien los datos
+
+        if (!req.body.nombre_libro || !req.body.lector_id || !req.body.categoria_id){
+            throw new Error ('Faltan datos. (Recordar que el lector 161 es la biblioteca)');
+        }
+
+        let query = 'SELECT * FROM libros WHERE nombre_libro=?'
+        let respuesta = await qy(query, [req.body.mail]);
+
+        // Verifico que no exista ese libro
+
+        if (respuesta.length>0){
+            throw new Error ("Ese libro ya se encuentra registrado");
+        }
+
+        query = 'INSERT INTO libros (nombre_libro, descripcion, lector_id, categoria_id) VALUES (?, ?, ?, ?)';
+        respuesta = await qy(query, [req.body.nombre_libro, req.body.descripcion, req.body.lector_id, req.body.categoria_id]);
+        res.send({"respuesta": respuesta.insertId});
+    }
+    catch(e){
+        console.error(e.message);
+        res.status(413).send({"Error": e.message});
+    }
+});
+
+app.delete('/libro/:id',async (req,res)=>{
+    try{
+        let query = 'SELECT * FROM libros WHERE lector_id = ?'
+        let respuesta = await qy(query, [req.body.lector_id, req.params.id]);
+
+        // Verifico que el libro exita
+        
+        if(respuesta.length == 0){
+            throw new Error ("No se ecuentra ese libro");
+        } 
+
+        // Verifico que el libro no este prestado
+        if (req.body.lector_id != 161){
+            throw new Error ("Ese libro esta prestado, no se puede eliminar");
+        }
+        
+        query = 'DELETE FROM libros WHERE id = ?';
+        respuesta = await qy(query, [req.params.id]);
+      
+        res.send({"respuesta": "Se borro correctamente"});
+    }
+    catch(e){
+        console.error(e.message);
+        res.status(413).send({"Error": e.message});
+    }
+
+});
+/*
+app.put('persona/:id', async (req, res)=>{
+    try{
+        let query = 'SELECT * FROM lectores WHERE id = ?';
+        let respuesta = await qy(query, [req.params.id]);
+
+        if (respuesta.length == 0){
+            throw new Error ("Persona no econtrada");
+        }
+
+        if (!req.body.nombre || !req.body.apellido || !req.body.alias){
+            throw new Error ('Faltan datos');
+        }
+             
+        query = 'UPDATE lectores SET nombre = ?, apellido = ?, alias = ? WHERE id = ?';
+        respuesta = await qy(query, [req.body.nombre, req.body.apellido, req.body.alias, req.params.id]);
+      
+        res.send({"respuesta": respuesta.affectedRows});
+    }
+    catch(e){
+        console.error(e.message);
+        res.status(413).send({"Error": e.message});
+    }
+
+
+});
+*/
+
+
 
 //Servidor
 app.listen(port, ()=>{
@@ -244,4 +361,3 @@ app.listen(port, ()=>{
 
 
 
-// SELECT g.id , l.categoria_id FROM genero g JOIN libros l ON g.nombre_genero = l.categoria_id;
