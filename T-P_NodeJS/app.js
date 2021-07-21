@@ -209,23 +209,23 @@ app.delete('/persona/:id',async (req,res)=>{
 
 });
 
-app.put('persona/:id', async (req, res)=>{
+app.put('/persona/:id', async (req, res)=>{
     try{
+        if (!req.body.nombre || !req.body.apellido || !req.body.alias){
+            throw new Error ('Faltan datos');
+        }
+        
         let query = 'SELECT * FROM lectores WHERE id = ?';
         let respuesta = await qy(query, [req.params.id]);
 
         if (respuesta.length == 0){
             throw new Error ("Persona no econtrada");
         }
-
-        if (!req.body.nombre || !req.body.apellido || !req.body.alias){
-            throw new Error ('Faltan datos');
-        }
-             
+                     
         query = 'UPDATE lectores SET nombre = ?, apellido = ?, alias = ? WHERE id = ?';
         respuesta = await qy(query, [req.body.nombre, req.body.apellido, req.body.alias, req.params.id]);
       
-        res.send({"respuesta": respuesta.affectedRows});
+        res.send({"respuesta": respuesta});
     }
     catch(e){
         console.error(e.message);
