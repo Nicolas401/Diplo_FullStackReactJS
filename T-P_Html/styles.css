@@ -1,0 +1,41 @@
+h1{
+    text-align: center;
+    font-size: xx-large;
+    background-color: antiquewhite;
+}
+h2{
+    text-align: center;
+}
+h3{
+    text-align: center;
+    font-style: oblique;
+    color: blanchedalmond;
+    background-color: black;
+}
+#foto{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 30%;
+}
+.series{
+    text-align: center;
+}
+.lista1{
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    list-style: inside;
+}
+.pelis{
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    
+}
+p{
+    text-align: center;
+}
+.form{
+    text-align: center;
+}
